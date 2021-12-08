@@ -25,14 +25,15 @@ def csvimp_result():
     connection = sqlite3.connect('tracking_tool.db')
     cursor = connection.cursor()
     with open('import_results.csv', 'r') as csvfile:
-        for index, row in enumerate(csv.reader(csvfile)):
-            insert_sql = '''
-            INSERT INTO Competency_Assessment_Results 
-            (user_id, assessment_id, score, date_taken, manager_id)
-            VALUES
-            (?, ?, ?, ?, ?)
-        ;'''
-        cursor.execute(insert_sql, [index, *row])
+        rows = csv.reader(csvfile)
+        print(rows)
+        insert_sql = '''
+        INSERT INTO Competency_Assessment_Results 
+        (user_id, assessment_id, score, date_taken, manager_id)
+        VALUES
+        (?, ?, ?, ?, ?)
+    ;'''
+        cursor.executemany(insert_sql, rows)
         cursor.connection.commit()
 # csvimp_result()
 
@@ -80,9 +81,6 @@ class Users:
         print('Login failed! Email or password not correct.')
         quit()
 
-
-
-      
 
 
     def add_user(self, cursor):
@@ -366,14 +364,6 @@ class Users:
         cursor.execute(update_sql, update_values)
         cursor.connection.commit()
 
-    def delete_result(self, result_id):
-        if not result_id:
-            print('Please enter result_id')
-        self.result_id = result_id
-        del_sql = 'DELETE FROM Competency_Assessment_Results WHERE result_id = ?'
-        del_values = (self.result_id)
-        cursor.execute(del_sql, del_values)
-        cursor.connection.commit()
 
 new_user = Users()
 # # new_user.__password = 'bobthebuilder'
@@ -435,6 +425,18 @@ class AssessmentResults:
 
 
 
+    # delete result
+    def delete_result(self, result_id):
+        if not result_id:
+            print('Please enter result_id')
+        self.result_id = result_id
+        del_sql = 'DELETE FROM Competency_Assessment_Results WHERE result_id = ?'
+        del_value = (self.result_id)
+        cursor.execute(del_sql, del_value)
+        cursor.connection.commit()
+
+
+
     # User Competency Summary Report
     def user_competency_summary_report(self, cursor):
         select_sql_1 = '''
@@ -469,7 +471,7 @@ class AssessmentResults:
         print(f'\nAverage competency score, across all assessment results: {row[0]}\n')
 
 
-# new_result = AssessmentResults()
+new_result = AssessmentResults()
 # new_result.set_results(2, 1, 1, '2021-09-22', 2)
 # new_result.add_result_user(cursor)
 # # new_result.result_id = 3
@@ -556,7 +558,7 @@ class Assessments:
 
 
 
-# new_assessment = Assessments()
+new_assessment = Assessments()
 # new_assessment.set_assessments(16, '2002-08-22', 'Using an API: a hands on exercise', 'In this exercise you are going to use a Google Spreadsheet to retrieve records from an API to Flickr, and display the results', 'Begginer')
 # new_assessment.add_assessment(cursor)
 # new_assessment.assessment_id = 8
@@ -671,7 +673,8 @@ if current_usertype[2] == 'user':
     print(f'''Welcome {current_usertype[0]} {current_usertype[1]}. Please select:
                 (E) edit/change your info/data
                 (C) to view your Competencies
-                (A) to view your Assessments''')
+                (A) to view your Assessments
+                (Q) to quit / log out''')
     user_choice = input('Enter your choice: ').lower()
     if user_choice == 'e':
         new_first_name = input('Enter your NEW FIRST NAME or Enter to skip: ')
@@ -685,13 +688,15 @@ if current_usertype[2] == 'user':
         new_user.view_user_competencies(email, cursor)
     if user_choice == 'a':
         new_user.view_user_assessments(email, cursor)
+    if user_choice == 'q':
+        quit()
 if current_usertype [2] == 'manager':
     print(f'''Welcome {current_usertype[0]} {current_usertype[1]}. Please select:
                 (V) to VIEW data
                 (A) to ADD data
                 (E) to EDIT data
                 (D) to DELETE data
-                (Q) to Quit ''')
+                (Q) to Quit / Log out''')
     manager_choice = input('Enter your choice: ').lower()
     if manager_choice == 'v':
         print('''What would you like to View today? Please select:
@@ -701,7 +706,7 @@ if current_usertype [2] == 'manager':
                     (4) to view a report of all users and their competency levels for a given competency
                     (5) to view a competency level report for an individual user
                     (6) to view a list of assessments for a given user 
-                    (7) to Quit''')
+                    (7) to Quit /  log out''')
         manager_select = int(input('Enter your choice(number 1-7): '))
         if manager_select == 1:
             new_user.view_all_users(cursor)
@@ -723,6 +728,73 @@ if current_usertype [2] == 'manager':
         if manager_select == 7:
             quit
     if manager_choice == 'a':
+        print('''What would you like to ADD today? Please select:
+                    (1) to ADD a user 
+                    (2) to ADD a new competency
+                    (3) to ADD a new assessment to a competency
+                    (4) to ADD an assessment result for a user for an assessment (this is like recording test results for a user)
+                    (5) to quit''')
+        manager_select = int(input('Enter your choice(number 1-5): '))
+        if manager_select == 1:
+            new_user.add_user(cursor)
+        if manager_select == 2:
+            new_competency.add_competency(cursor)
+        if manager_select == 3:
+            new_assessment.add_assessment(cursor)
+        if manager_select == 4:
+            new_assessment.add_result_user(cursor)
+        if manager_select == 5:
+            quit()
+    if manager_choice == 'e':
+        print('''What would you like to Edit today? Please select:
+            (1) to EDIT a user's information 
+            (2) to EDIT a competency
+            (3) to EDIT an assessment
+            (4) to EDIT an assessment result
+            (5) to quit''')
+        manager_select = int(input('Enter your choice(number 1-5): '))
+        if manager_select == 1:
+            user_id = ('Enter user_id: ')
+            new_first_name = input('Enter FIRST NAME or Enter to skip: ').title()
+            new_last_name = input('Enter the new LAST NAME or Enter to skip: ').title()
+            new_phone = input('Enter PHONE NUMBER(only numbers) or Enter to skip: ')
+            new_email = input('Enter EMAIL or Enter to skip: ')
+            new_date_created = input('Enter date_created or Enter to skip: ')
+            hire_date = input('Enter date_created or Enter to skip: ')
+            user_type = input('Enter date_created or Enter to skip: ')
+            active = input('Enter active or Enter to skip: ')
+            new_user.manager_edit_user(first_name = None, last_name = None, phone = None, email = None, date_created = None, hire_date = None, user_type = None, active = None)
+        if manager_select == 2:
+            name = input('Enter the new competency name or Enter to skip: ')
+            description = input('Enter the new description or Enter to skip: ')
+            date_added = input('Enter the new date_added or Enter to skip: ')
+            active = input('Enter active or Enter to skip: ')
+            new_competency.edit_competency(name = None, description = None, date_added = None, active = None)
+        if manager_select == 3:
+            assessment_id = input('Enter assessment_id: ')
+            date_established = input('Enter new date_established or Enter to skip: ')
+            name = input('Enter the new assessment name or Enter to skip: ')
+            description = input('Enter the new description or Enter to skip: ')
+            level = input('Enter the new level or Enter to skip: ')
+            active = input('Enter active or Enter to skip: ')
+            new_assessment.edit_assessment(date_established = None, name = None, description = None, level = None, active = None)
+        if manager_select == 4:
+            result_id = input('Enter an result_id: ')
+            new_score = input('Enter the new assessment result')
+            new_assessment.edit_result(new_score)
+        if manager_select == 5:
+            quit()
+    if manager_choice == 'd':
+        input('Enter result_id: ')
+        new_result.delete_result(result_id)
+    if manager_choice == 'q':
+        quit()
+
+
+
+
+
+        
 
 
 
@@ -761,18 +833,18 @@ if current_usertype [2] == 'manager':
 
 #     def user_competency_summary_report(self, cursor):
 #         select_sql = '''
-#         SELECT u.first_name, u.last_name, c.name, a.name, r.score
-#         FROM Users u
-#         JOIN Competency_Assessment_Results r ON
-#         u.user_id = r.user_id
-#         JOIN Assessments a ON
-#         r.assessment_id = a.assessment_id
-#         JOIN Competencies c ON
-#         a.competency_id = c.competency_id
-#         WHERE r.user_id = ?,
-#         SELECT AVG(r.score) as Avarage_Score
-#         From Competency_Assessment_Results r
-#         WHERE r.user_id = 1
+        # SELECT u.first_name, u.last_name, c.name, a.name, r.score
+        # FROM Users u
+        # JOIN Competency_Assessment_Results r ON
+        # u.user_id = r.user_id
+        # JOIN Assessments a ON
+        # r.assessment_id = a.assessment_id
+        # JOIN Competencies c ON
+        # a.competency_id = c.competency_id
+        # WHERE r.user_id = ?,
+        # SELECT AVG(r.score) as Avarage_Score
+        # From Competency_Assessment_Results r
+        # WHERE r.user_id = 1
 #         '''
 
 
