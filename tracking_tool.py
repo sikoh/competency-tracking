@@ -25,15 +25,17 @@ def csvimp_result():
     connection = sqlite3.connect('tracking_tool.db')
     cursor = connection.cursor()
     with open('import_results.csv', 'r') as csvfile:
+        fields = next(csvfile)
         rows = csv.reader(csvfile)
-        print(rows)
+        for row in rows:
+            print (row)
         insert_sql = '''
         INSERT INTO Competency_Assessment_Results 
         (user_id, assessment_id, score, date_taken, manager_id)
         VALUES
         (?, ?, ?, ?, ?)
     ;'''
-        cursor.executemany(insert_sql, rows)
+        cursor.execute(insert_sql, row)
         cursor.connection.commit()
 # csvimp_result()
 
@@ -336,7 +338,7 @@ class Users:
 
 
     # edit a user's information. User can edit their own info/data
-    def edit_own_data(self, email, new_first_name = '', new_last_name = '', new_phone = '', new_email = '', new_password = ''):
+    def edit_own_data(self, email, new_first_name = None, new_last_name = None, new_phone = None, new_email = None, new_password = None):
         self.email = email
         set_clauses = []
         update_values = []
@@ -723,11 +725,12 @@ if current_usertype[2] == 'user':
         new_password = input('Enter your NEW PASSWORD or Enter to skip: ')
 
         new_user.edit_own_data(new_first_name, new_last_name, new_phone, new_email, new_password)
-    if user_choice == 'c':
+    elif user_choice == 'c':
+        email = input('Enter your email:')
         new_user.view_user_competencies(email, cursor)
-    if user_choice == 'a':
+    elif user_choice == 'a':
         new_user.view_user_assessments(email, cursor)
-    if user_choice == 'q':
+    elif user_choice == 'q':
         quit()
     else:
         print('Not valid input. Please enter E, C, A or Q')
@@ -738,6 +741,7 @@ if current_usertype [2] == 'manager':
                 (E) to EDIT data
                 (D) to DELETE data
                 (R) to VIEW and EXPORT Reports
+                (I) import from CSV
                 (Q) to Quit / Log out''')
     manager_choice = input('Enter your choice: ').lower()
     if manager_choice == 'v':
@@ -870,6 +874,8 @@ if current_usertype [2] == 'manager':
         manager_select = int(input('Enter your choice: '))
         if manager_select == 1:
             new_user.user_competency_summary_report(cursor, user_id)
+    if manager_choice == 'i':
+        csvimp_result()
 
     if manager_choice == 'q':
         quit()
