@@ -83,7 +83,16 @@ class Users:
 
 
 
-    def add_user(self, cursor):
+    def add_user(self, first_name, last_name, phone, email, password, date_created, hire_date, user_type, cursor):
+        self.first_name = first_name
+        self.last_name = last_name 
+        self.phone = phone 
+        self.email = email 
+        self.__password = bcrypt.hashpw(password.encode('utf-8'), self.salt)
+        self.date_created = date_created 
+        self.hire_date = hire_date 
+        self.user_type = user_type
+
         insert_sql = '''
             INSERT INTO Users 
             (first_name, last_name, phone, email, password, date_created, hire_date, user_type)
@@ -118,9 +127,9 @@ class Users:
         if not rows:
             print('No data available')
             return
-        print(f'{"User Id":<10} {"First Name":<20} {"Last Name":<20} {"Phone":<20} {"Email":<30} {"Password":<20} {"Date Created":<20} {"Hire Date":<20} {"User Type":<20} {"Active":<10}')
+        print(f'{"User Id":<10} {"First Name":<20} {"Last Name":<20} {"Phone":<20} {"Email":<30} {"Date Created":<20} {"Hire Date":<20} {"User Type":<20} {"Active":<10}')
         for row in rows:
-            print(f'{row[0]:<10} {row[1]:<20} {row[2]:<20} {row[3]:<20} {row[4]:<30} {row[5]:<20} {row[6]:<20} {row[7]:<20} {row[8]:<20} {row[9]:<10}')
+            print(f'{row[0]:<10} {row[1]:<20} {row[2]:<20} {row[3]:<20} {row[4]:<30} {row[6]:<20} {row[7]:<20} {row[8]:<20} {row[9]:<10}')
     
 
     # view all user competencies by user and it's email
@@ -246,7 +255,7 @@ class Users:
 
     
     # search for users by first name or last name
-    def search_user_byname(self, first_name = '', last_name = ''):
+    def search_user_byname(self, cursor, first_name = None, last_name = None):
         where_clauses = []
         query_parameters = []
 
@@ -270,15 +279,15 @@ class Users:
         if not rows:
             print('The name was not found in the database')
             return
-        print(f'''{"User Id":<20} {"First Name":<20} {"Last Name":<20} {"Phone":<20} {"Email":<30} 
-            {"Date Created":<20} {"Hire Date":<20} {"User Type":<20} {"Active":<20}''')
+        print(f'''{"User Id":<20} {"First Name":<20} {"Last Name":<20} {"Phone":<20} {"Email":<30} {"Date Created":<20} {"Hire Date":<20} {"User Type":<20} {"Active":<20}''')
         for row in rows:
             print(f'{row[0]:<20} {row[1]:<20} {row[2]:<20} {row[3]:<20} {row[4]:<30} {row[5]:<20} {row[6]:<20} {row[7]:<20} {row[8]:<20}')
     
 
 
     # edit a user's information for managers
-    def manager_edit_user(self, first_name= None, last_name = None, phone = None, email = None, date_created = None, hire_date = None, user_type = None, active = None):
+    def manager_edit_user(self, user_id, first_name= None, last_name = None, phone = None, email = None, date_created = None, hire_date = None, user_type = None, active = None):
+        self.user_id = user_id
         set_clauses = []
         update_values = []
 
@@ -365,6 +374,44 @@ class Users:
         cursor.connection.commit()
 
 
+
+    # User Competency Summary Report
+    def user_competency_summary_report(self, cursor, user_id):
+        self.user_id = user_id
+        select_sql_1 = '''
+            SELECT u.first_name, u.last_name, c.name, a.name, r.score
+            FROM Users u
+            JOIN Competency_Assessment_Results r ON
+            u.user_id = r.user_id
+            JOIN Assessments a ON
+            r.assessment_id = a.assessment_id
+            JOIN Competencies c ON
+            a.competency_id = c.competency_id
+            WHERE r.user_id = ?
+            group by a.name
+            order by r.date_taken
+        '''
+        select_sql_2 = '''SELECT AVG(r.score) as Avarage_Score
+            From Competency_Assessment_Results r
+            WHERE r.user_id = ?
+        '''
+
+
+        rows = cursor.execute(select_sql_1, (self.user_id,)).fetchall()
+        
+        if not rows:
+            print('No Competencies for this user')
+            return
+        print(f'{"First Name":<20} {"Last Name":<20} {"Competency Name":<40} {"Assessment Name":<40} {"Score":<5}')
+        for row in rows:
+            print(f'{row[0]:<20} {row[1]:<20} {row[2]:<40} {row[3]:<40} {row[4]:<5}')
+
+        row = cursor.execute(select_sql_2, (self.user_id,)).fetchone()
+        print(f'\nAverage competency score, across all assessment results: {row[0]}\n')
+
+
+
+
 new_user = Users()
 # # new_user.__password = 'bobthebuilder'
 # new_user.user_id = 19
@@ -400,7 +447,14 @@ class AssessmentResults:
         self.manager_id = manager_id
 
 
-    def add_result_user(self, cursor):
+    def add_result_user(self, user_id, assessment_id, score, date_taken, manager_id):
+        self.user_id = user_id
+        self.assessment_id = assessment_id
+        self.score = score
+        self.date_taken = date_taken
+        self.manager_id = manager_id
+
+
         insert_sql = '''
             INSERT INTO Competency_Assessment_Results 
             (user_id, assessment_id, score, date_taken, manager_id)
@@ -410,11 +464,21 @@ class AssessmentResults:
         insert_values = (self.user_id, self.assessment_id, self.score, self.date_taken, self.manager_id)
         cursor.execute(insert_sql, insert_values)
         cursor.connection.commit()
-
+        # else:
+        #     insert_sql = '''
+        #         INSERT INTO Competency_Assessment_Results 
+        #         (user_id, assessment_id, score, date_taken)
+        #         VALUES
+        #         (?, ?, ?, ?)
+        #     ;'''
+        #     insert_values = (self.user_id, self.assessment_id, self.score, self.date_taken)
+        #     cursor.execute(insert_sql, insert_values)
+        #     cursor.connection.commit()
 
 
     # edit an assessment result
-    def edit_result(self, new_score):
+    def edit_result(self, result_id, new_score):
+        self.result_id = result_id
         if not new_score:
             print('Please enter the new score/result')
         self.score = new_score
@@ -431,44 +495,9 @@ class AssessmentResults:
             print('Please enter result_id')
         self.result_id = result_id
         del_sql = 'DELETE FROM Competency_Assessment_Results WHERE result_id = ?'
-        del_value = (self.result_id)
-        cursor.execute(del_sql, del_value)
+        cursor.execute(del_sql, (self.result_id,))
         cursor.connection.commit()
 
-
-
-    # User Competency Summary Report
-    def user_competency_summary_report(self, cursor):
-        select_sql_1 = '''
-            SELECT u.first_name, u.last_name, c.name, a.name, r.score
-            FROM Users u
-            JOIN Competency_Assessment_Results r ON
-            u.user_id = r.user_id
-            JOIN Assessments a ON
-            r.assessment_id = a.assessment_id
-            JOIN Competencies c ON
-            a.competency_id = c.competency_id
-            WHERE r.user_id = ?
-            group by a.name
-            order by r.date_taken
-        '''
-        select_sql_2 = '''SELECT AVG(r.score) as Avarage_Score
-            From Competency_Assessment_Results r
-            WHERE r.user_id = ?
-        '''
-
-
-        rows = cursor.execute(select_sql_1, (self.user_id,)).fetchall()
-        
-        if not rows:
-            print('No Competencies for this user')
-            return
-        print(f'{"First Name":<20} {"Last Name":<20} {"Competency Name":<40} {"Assessment Name":<40}{"Score":<5}')
-        for row in rows:
-            print(f'{row[0]:<20} {row[1]:<20} {row[2]:<40} {row[3]:<40} {row[4]:<5}')
-
-        row = cursor.execute(select_sql_2, (self.user_id,)).fetchone()
-        print(f'\nAverage competency score, across all assessment results: {row[0]}\n')
 
 
 new_result = AssessmentResults()
@@ -504,7 +533,12 @@ class Assessments:
 
 
 
-    def add_assessment(self, cursor):
+    def add_assessment(self, competency_id, date_established, name, description, level, cursor):
+        self.competency_id = competency_id
+        self.date_established = date_established
+        self.name = name
+        self.description = description 
+        self.level = level
         insert_sql = '''
             INSERT INTO Assessments 
             (competency_id, date_established, name, description, level)
@@ -517,7 +551,8 @@ class Assessments:
 
 
     # edit an assessment
-    def edit_assessment(self, date_established = None, name = None, description = None, level = None, active = None):
+    def edit_assessment(self, assessment_id, date_established = None, name = None, description = None, level = None, active = None):
+        self.assessment_id = assessment_id
         set_clauses = []
         update_values = []
 
@@ -581,7 +616,10 @@ class Competencies:
 
 
 
-    def add_competency(self, cursor):
+    def add_competency(self, name, description, date_added, cursor):
+        self.name = name
+        self.description = description
+        self.date_added = date_added
         insert_sql = '''
             INSERT INTO Competencies 
             (name, description, date_added)
@@ -620,7 +658,8 @@ class Competencies:
 
 
     # edit a competency
-    def edit_competency(self, name = None, description = None, date_added = None, active = None):
+    def edit_competency(self, competency_id, name = None, description = None, date_added = None, active = None):
+        self.competency_id = competency_id
         set_clauses = []
         update_values = []
 
@@ -663,7 +702,7 @@ new_competency = Competencies()
 
 
 
-print('Welcome to Dev Pipeline!\n Please log in.')
+print('\nWelcome to Dev Pipeline!\n Please log in.')
 # new_password = input('Enter your password: ')
 email = input('Enter your email: ')
 # new_user.check_password(email, new_password, cursor)
@@ -690,12 +729,15 @@ if current_usertype[2] == 'user':
         new_user.view_user_assessments(email, cursor)
     if user_choice == 'q':
         quit()
+    else:
+        print('Not valid input. Please enter E, C, A or Q')
 if current_usertype [2] == 'manager':
     print(f'''Welcome {current_usertype[0]} {current_usertype[1]}. Please select:
                 (V) to VIEW data
                 (A) to ADD data
                 (E) to EDIT data
                 (D) to DELETE data
+                (R) to VIEW and EXPORT Reports
                 (Q) to Quit / Log out''')
     manager_choice = input('Enter your choice: ').lower()
     if manager_choice == 'v':
@@ -713,7 +755,7 @@ if current_usertype [2] == 'manager':
         if manager_select == 2:
             first_name = input('Enter FIRST NAME of the user or Enter to skip: ')
             last_name = input('Enter LAST NAME of the user or Enter to skip: ')
-            new_user.search_user_byname(first_name = None, last_name = None)
+            new_user.search_user_byname(cursor, first_name, last_name)
         if manager_select == 3:
             user_id = input('Enter user_id of the user: ')
             new_user.view_user_competencies(user_id, cursor)
@@ -721,7 +763,8 @@ if current_usertype [2] == 'manager':
             competency_id = input('Enter competency_id: ')
             new_competency.view_level_comp_rep(competency_id, cursor)
         if manager_select == 5:
-            pass
+            user_id = int(input('Enter user_id: '))
+            new_user.user_competency_summary_report(cursor, user_id)
         if manager_select == 6:
             user_id = input('Enter user_id of the user: ')
             new_user.view_user_assessments(user_id, cursor)
@@ -732,44 +775,74 @@ if current_usertype [2] == 'manager':
                     (1) to ADD a user 
                     (2) to ADD a new competency
                     (3) to ADD a new assessment to a competency
-                    (4) to ADD an assessment result for a user for an assessment (this is like recording test results for a user)
+                    (4) to ADD an assessment result for a user
                     (5) to quit''')
         manager_select = int(input('Enter your choice(number 1-5): '))
+        # add user
         if manager_select == 1:
-            new_user.add_user(cursor)
+            first_name = input('Enter first name: ').title()
+            last_name = input('Enter last name: ').title()
+            phone = input('Enter phone number: ')
+            email = input('Enter an email: ')
+            password = input('Enter a password: ')
+            date_created = input('Enter date_created: ')
+            hire_date = input('Enter hire_date: ')
+            user_type = input('Enter a user type: ')
+            new_user.add_user(first_name, last_name, phone, email, password, date_created, hire_date, user_type, cursor)
+        # add competency
         if manager_select == 2:
-            new_competency.add_competency(cursor)
+            name = input('Enter competency name: ')
+            description = input('Enter description: ')
+            date_added = input('Enter date_added: ')
+            new_competency.add_competency(name, description, date_added, cursor)
+        # add assessment
         if manager_select == 3:
-            new_assessment.add_assessment(cursor)
+            competency_id = int(input('Enter a competency_id: '))
+            date_established = input('Enter date_established: ')
+            name = input('Enter assessment name: ') 
+            description = input('Enter description: ')
+            level = input('Enter level: ').title()
+            new_assessment.add_assessment(competency_id, date_established, name, description, level, cursor)
+        # add result
         if manager_select == 4:
-            new_assessment.add_result_user(cursor)
+            user_id = input('Enter user_id: ')
+            assessment_id = input('Enter assessment_id: ')
+            score = input("Enter user's result: ")
+            date_taken = input('Enter date_taken: ')
+            manager_id = input('Enter manager_id: ')
+            new_result.add_result_user(user_id, assessment_id, score, date_taken, manager_id)
         if manager_select == 5:
             quit()
+    # edit choices
     if manager_choice == 'e':
         print('''What would you like to Edit today? Please select:
             (1) to EDIT a user's information 
             (2) to EDIT a competency
-            (3) to EDIT an assessment
+            (3) to EDIT an assessmentS
             (4) to EDIT an assessment result
             (5) to quit''')
         manager_select = int(input('Enter your choice(number 1-5): '))
+        # edit user's info/data
         if manager_select == 1:
-            user_id = ('Enter user_id: ')
-            new_first_name = input('Enter FIRST NAME or Enter to skip: ').title()
-            new_last_name = input('Enter the new LAST NAME or Enter to skip: ').title()
-            new_phone = input('Enter PHONE NUMBER(only numbers) or Enter to skip: ')
-            new_email = input('Enter EMAIL or Enter to skip: ')
-            new_date_created = input('Enter date_created or Enter to skip: ')
-            hire_date = input('Enter date_created or Enter to skip: ')
-            user_type = input('Enter date_created or Enter to skip: ')
+            user_id = int(input('Enter user_id: '))
+            first_name = input('Enter FIRST NAME or Enter to skip: ').title()
+            last_name = input('Enter the new LAST NAME or Enter to skip: ').title()
+            phone = input('Enter PHONE NUMBER(only numbers) or Enter to skip: ')
+            email = input('Enter EMAIL or Enter to skip: ')
+            date_created = input('Enter date_created or Enter to skip: ')
+            hire_date = input('Enter hire_date or Enter to skip: ')
+            user_type = input('Enter user_type or Enter to skip: ')
             active = input('Enter active or Enter to skip: ')
-            new_user.manager_edit_user(first_name = None, last_name = None, phone = None, email = None, date_created = None, hire_date = None, user_type = None, active = None)
+            new_user.manager_edit_user(user_id, first_name, last_name, phone, email, date_created, hire_date , user_type, active)
+        # edit a competency
         if manager_select == 2:
+            competency_id = int(input('Enter competency_id: '))
             name = input('Enter the new competency name or Enter to skip: ')
             description = input('Enter the new description or Enter to skip: ')
             date_added = input('Enter the new date_added or Enter to skip: ')
             active = input('Enter active or Enter to skip: ')
-            new_competency.edit_competency(name = None, description = None, date_added = None, active = None)
+            new_competency.edit_competency(competency_id, name, description, date_added, active)
+        # edit an assessment
         if manager_select == 3:
             assessment_id = input('Enter assessment_id: ')
             date_established = input('Enter new date_established or Enter to skip: ')
@@ -777,16 +850,27 @@ if current_usertype [2] == 'manager':
             description = input('Enter the new description or Enter to skip: ')
             level = input('Enter the new level or Enter to skip: ')
             active = input('Enter active or Enter to skip: ')
-            new_assessment.edit_assessment(date_established = None, name = None, description = None, level = None, active = None)
+            new_assessment.edit_assessment(assessment_id, date_established, name, description, level, active)
+        # edit a result
         if manager_select == 4:
             result_id = input('Enter an result_id: ')
-            new_score = input('Enter the new assessment result')
-            new_assessment.edit_result(new_score)
+            new_score = input('Enter the new assessment result: ')
+            new_result.edit_result(result_id, new_score)
         if manager_select == 5:
             quit()
+    # delete a result
     if manager_choice == 'd':
-        input('Enter result_id: ')
+        result_id = input('Enter result_id: ')
         new_result.delete_result(result_id)
+    if manager_choice == 'r':
+        print('''Which REPORT would you like to VIEW and EXPORT? Enter:
+                    (1) for User Competency Summary Report
+                    (2) for Competency Results Summary for all Users
+        ''')
+        manager_select = int(input('Enter your choice: '))
+        if manager_select == 1:
+            new_user.user_competency_summary_report(cursor, user_id)
+
     if manager_choice == 'q':
         quit()
 

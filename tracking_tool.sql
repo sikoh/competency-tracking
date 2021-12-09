@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS Competency_Assessment_Results (
     assessment_id INTEGER NOT NULL,
     score INTEGER NOT NULL,
     date_taken TEXT,
-    manager_id INTEGER NOT NULL,
+    manager_id INTEGER,
     FOREIGN KEY (user_id)
         REFERENCES Users (user_id)
     FOREIGN KEY (assessment_id)
@@ -47,24 +47,25 @@ CREATE TABLE IF NOT EXISTS Competencies (
     active INTEGER DEFAULT 1
 );
 
+-- password for all users is 123456
 
 -- INSERT INTO Users (first_name, last_name, phone, email, password, date_created, hire_date, user_type, active) VALUES
--- ('John', 'Smith', '8341564893', 'jsmith@somemail.com', 'johnny123', '2020-05-15', '2020-05-17', 'user', 1),
--- ('James', 'Williams', '2341564895', 'jwilliams@somemail.com', 'janes786', '2000-06-20', '2000-06-22', 'manager', 1),
--- ('Robert', 'Brown', '2341534893', 'rbrown@somemail.com', 'roby543', '2021-10-02', '2021-10-04', 'user', 1),
--- ('Olivia', 'Garcia', '2471564893', 'ogarcia@somemail.com', 'olii786', '1999-09-01', '1999-09-03', 'manager', 1),
--- ('Ava', 'Miller', '3341564893', 'amiller@somemail.com', 'avkata90', '2005-07-04', '2005-07-06', 'user', 1),
--- ('Mia', 'Davis', '2841564893', 'mdavis@somemail.com', 'miada87', '2005-04-04', '2005-04-06', 'user', 1),
--- ('Mark', 'Lopez', '2351564693', 'mlopez@somemail.com', 'mamasboy56', '2004-12-05', '2004-12-07', 'user', 1),
--- ('Thomas', 'Lopez', '2341564897', 'tatalopez@somemail.com', 'tomylopp#1', '2000-05-04', '2000-05-06', 'user', 1),
--- ('Donald', 'Anderson', '2345564593', 'dahhhnderson@somemail.com', 'dodytos56782', '2001-08-11', '2001-08-03', 'user', 1),
--- ('Isabella', 'Moore', '7341564893', 'imoore@somemail.com', '78bbbb7hb2', '2002-12-09', '2002-12-09', 'user', 0),
--- ('Sophia', 'White', '2541564493', 'swhite@somemail.com', 'sofiata667ss', '1999-03-02', '1999-03-04', 'manager', 1),
--- ('Angel', 'Lee', '1341123893', 'alee@somemail.com', 'angelitemi2ts', '2006-08-20', '2006-08-22', 'user', 1),
--- ('Ava', 'Davis', '4347664893', 'amamadavis@somemail.com', 'davitoesbf56b', '2008-11-08', '2008-11-10', 'user', 1),
--- ('Mia', 'Taylor', '9341564893', 'mtaylor@somemail.com', 'mabddd89u', '2009-05-22', '2009-05-24', 'user', 0),
--- ('Mark', 'Wilson', '5342584893', 'mwilson@somemail.com', 'makosandfriends78', '2003-05-18', '2003-05-20', 'user', 1),
--- ('Thomas', 'Anderson', '7981564893', 'tanderson@somemail.com', 'tomkatagore674', '2006-02-19', '2006-02-20', 'user', 1);
+-- ('John', 'Smith', '8341564893', 'jsmith@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2020-05-15', '2020-05-17', 'user', 1),
+-- ('James', 'Williams', '2341564895', 'jwilliams@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2000-06-20', '2000-06-22', 'manager', 1),
+-- ('Robert', 'Brown', '2341534893', 'rbrown@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2021-10-02', '2021-10-04', 'user', 1),
+-- ('Olivia', 'Garcia', '2471564893', 'ogarcia@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '1999-09-01', '1999-09-03', 'manager', 1),
+-- ('Ava', 'Miller', '3341564893', 'amiller@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2005-07-04', '2005-07-06', 'user', 1),
+-- ('Mia', 'Davis', '2841564893', 'mdavis@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2005-04-04', '2005-04-06', 'user', 1),
+-- ('Mark', 'Lopez', '2351564693', 'mlopez@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2004-12-05', '2004-12-07', 'user', 1),
+-- ('Thomas', 'Lopez', '2341564897', 'tatalopez@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2000-05-04', '2000-05-06', 'user', 1),
+-- ('Donald', 'Anderson', '2345564593', 'dahhhnderson@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2001-08-11', '2001-08-03', 'user', 1),
+-- ('Isabella', 'Moore', '7341564893', 'imoore@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2002-12-09', '2002-12-09', 'user', 0),
+-- ('Sophia', 'White', '2541564493', 'swhite@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '1999-03-02', '1999-03-04', 'manager', 1),
+-- ('Angel', 'Lee', '1341123893', 'alee@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2006-08-20', '2006-08-22', 'user', 1),
+-- ('Ava', 'Davis', '4347664893', 'amamadavis@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2008-11-08', '2008-11-10', 'user', 1),
+-- ('Mia', 'Taylor', '9341564893', 'mtaylor@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2009-05-22', '2009-05-24', 'user', 0),
+-- ('Mark', 'Wilson', '5342584893', 'mwilson@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2003-05-18', '2003-05-20', 'user', 1),
+-- ('Thomas', 'Anderson', '7981564893', 'tanderson@somemail.com', '$2b$12$/ZZqdRIUORBf7rBDOCVz5uK1k9EYZ6CMVSvGvv9d1WQFP6igXxs1C', '2006-02-19', '2006-02-20', 'user', 1);
 
 
 -- INSERT INTO Competencies (name, description, date_added, active) VALUES
