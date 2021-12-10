@@ -865,7 +865,7 @@ elif manager_choice == 'a':
                 (2) to ADD a new competency
                 (3) to ADD a new assessment to a competency
                 (4) to ADD an assessment result for a user
-                (5) to quit''')
+                (5) to quit/ log out''')
     manager_select = int(input('Enter your choice(number 1-5): '))
     # add user
     if manager_select == 1:
@@ -911,7 +911,7 @@ elif manager_choice == 'e':
         (2) to EDIT a competency
         (3) to EDIT an assessmentS
         (4) to EDIT an assessment result
-        (5) to quit''')
+        (5) to quit / log out''')
     manager_select = int(input('Enter your choice(number 1-5): '))
     # edit user's info/data
     if manager_select == 1:
@@ -955,6 +955,7 @@ elif manager_choice == 'e':
 elif manager_choice == 'd':
     result_id = input('Enter result_id: ')
     new_result.delete_result(result_id)
+#  reports and export to CSV
 elif manager_choice == 'r':
     print('''Which REPORT would you like to VIEW and EXPORT? Enter:
                 (1) for User Competency Summary Report
@@ -976,8 +977,10 @@ elif manager_choice == 'r':
         quit()
     else:
         print('Invalid Input!')
+# import from CSV
 elif manager_choice == 'i':
     csvimp_result()
+# log out
 elif manager_choice == 'q':
     quit()
 else:
