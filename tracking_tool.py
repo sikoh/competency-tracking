@@ -135,7 +135,7 @@ class Users:
     
 
     # view all user competencies by user and it's email
-    def view_user_competencies(self, email, cursor):
+    def view_own_competencies(self, email, cursor):
         if not email:
             print('Enter your email')
         self.email = email
@@ -164,7 +164,7 @@ class Users:
     # view all user competencies by user and it's user_id
     def view_user_competencies(self, user_id, cursor):
         if not user_id:
-            print('Enter your email')
+            print('Enter your user_id')
         self.user_id = user_id
         select_sql = '''
         SELECT u.first_name, u.last_name, c.name, a.name, r.score
@@ -190,7 +190,7 @@ class Users:
 
 
     # view a list of assessments for a given user...this method is used by the user itself, using email
-    def view_user_assessments(self, email, cursor):
+    def view_own_assessments(self, email, cursor):
         self.email = email
         select_sql = '''
         SELECT u.first_name, u.last_name, a.name, r.score
@@ -338,7 +338,7 @@ class Users:
 
 
     # edit a user's information. User can edit their own info/data
-    def edit_own_data(self, email, new_first_name = None, new_last_name = None, new_phone = None, new_email = None, new_password = None):
+    def edit_own_data(self, email, new_first_name = None, new_last_name = None, new_phone = None, new_email = None, new_password = ''):
         self.email = email
         set_clauses = []
         update_values = []
@@ -411,8 +411,46 @@ class Users:
         row = cursor.execute(select_sql_2, (self.user_id,)).fetchone()
         print(f'\nAverage competency score, across all assessment results: {row[0]}\n')
 
+    #  user report - csv export 
+
+    def csv_user_report(self, cursor, user_id):
+        self.user_id = user_id
+        select_sql_1 = '''
+            SELECT u.first_name, u.last_name, c.name, a.name, r.score
+            FROM Users u
+            JOIN Competency_Assessment_Results r ON
+            u.user_id = r.user_id
+            JOIN Assessments a ON
+            r.assessment_id = a.assessment_id
+            JOIN Competencies c ON
+            a.competency_id = c.competency_id
+            WHERE r.user_id = ?
+            group by a.name
+            order by r.date_taken
+        '''
+        select_sql_2 = '''SELECT ROUND(AVG(r.score),2) as Avarage_Score
+            From Competency_Assessment_Results r
+            WHERE r.user_id = ?
+        '''
 
 
+        rows = cursor.execute(select_sql_1, (self.user_id,)).fetchall()
+        
+        if not rows:
+            print('No Competencies for this user')
+            return
+        print(f'{"First Name":<20} {"Last Name":<20} {"Competency Name":<40} {"Assessment Name":<40} {"Score":<5}')
+        for row in rows:
+            print(f'{row[0]:<20} {row[1]:<20} {row[2]:<40} {row[3]:<40} {row[4]:<5}')
+
+        row1 = cursor.execute(select_sql_2, (self.user_id,)).fetchone()
+        print(f'\nAverage competency score, across all assessment results: {row1[0]}\n')
+
+        with open('user_report.csv', 'w') as file:
+            writer = csv.writer(file)
+            writer.writerow(['first_name', 'last_name', 'c.name', 'a.name', 'score'])
+            writer.writerows(rows)
+            writer.writerow(['Average_competency_score_across_all_assessment_results:', row1[0]])
 
 new_user = Users()
 # # new_user.__password = 'bobthebuilder'
@@ -694,6 +732,50 @@ class Competencies:
         cursor.connection.commit()
 
 
+    # export csv competency report
+    def csv_competency_report(self, cursor, competency_id):
+        self.competency_id = competency_id
+        select_sql_1 = '''
+            SELECT c.name as Competency, round(avg(r.score),2) as avg_score
+            FROM Users u
+            JOIN Competency_Assessment_Results r ON
+            u.user_id = r.user_id
+            JOIN Assessments a ON
+            r.assessment_id = a.assessment_id
+            JOIN Competencies c ON
+            a.competency_id = c.competency_id
+            WHERE c.competency_id = ?;
+        '''
+        select_sql_2 = '''
+            SELECT u.first_name, u.last_name, c.name as Competency, IFNULL(r.score,0) as score, a.name as Assessment, r.date_taken 
+            FROM Users u
+            LEFT JOIN Competency_Assessment_Results r ON
+            u.user_id = r.user_id
+            LEFT JOIN Assessments a ON
+            r.assessment_id = a.assessment_id
+            Left JOIN Competencies c ON
+            a.competency_id = c.competency_id
+            ORDER BY r.date_taken DESC
+        '''
+
+
+        rows = cursor.execute(select_sql_2, (self.competency_id,)).fetchall()
+
+        if not rows:
+            print('No Competencies for this user')
+            return
+        print(f'{"First Name":<20} {"Last Name":<20} {"Competency Name":<40} {"Assessment Name":<40} {"Score":<5}')
+        for row in rows:
+            print(f'{row[0]:<20} {row[1]:<20} {row[2]:<40} {row[3]:<40} {row[4]:<5}')
+
+        row1 = cursor.execute(select_sql_2, (self.competency_id,)).fetchone()
+        print(f'\nAverage competency score, across all assessment results: {row1[0]}\n')
+
+        with open('user_report.csv', 'w') as file:
+            writer = csv.writer(file)
+            writer.writerow(['first_name', 'last_name', 'c.name', 'a.name', 'score'])
+            writer.writerows(rows)
+            writer.writerow(['Average_competency_score_across_all_assessment_results:', row1[0]])
 
 new_competency = Competencies()
 # # new_competency.set_competencies('API', 'Learn how to work with API', '2002-08-22')
@@ -726,10 +808,9 @@ if current_usertype[2] == 'user':
 
         new_user.edit_own_data(new_first_name, new_last_name, new_phone, new_email, new_password)
     elif user_choice == 'c':
-        email = input('Enter your email:')
-        new_user.view_user_competencies(email, cursor)
+        new_user.view_own_competencies(email, cursor)
     elif user_choice == 'a':
-        new_user.view_user_assessments(email, cursor)
+        new_user.view_own_assessments(email, cursor)
     elif user_choice == 'q':
         quit()
     else:
@@ -873,10 +954,12 @@ if current_usertype [2] == 'manager':
         ''')
         manager_select = int(input('Enter your choice: '))
         if manager_select == 1:
-            new_user.user_competency_summary_report(cursor, user_id)
+            user_id = input('Enter user_id: ')
+            new_user.csv_user_report(cursor, user_id)
+        if manager_select == 2:
+            pass
     if manager_choice == 'i':
         csvimp_result()
-
     if manager_choice == 'q':
         quit()
 
