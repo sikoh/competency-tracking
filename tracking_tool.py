@@ -337,8 +337,8 @@ class Users:
         cursor.connection.commit()
 
 
-    # edit a user's information. User can edit their own info/data
-    def edit_own_data(self, email, new_first_name = None, new_last_name = None, new_phone = None, new_email = None, new_password = ''):
+    # edit user's information. User can edit their own info/data
+    def edit_own_data(self, email, new_first_name = None, new_last_name = None, new_phone = None, new_email = None, new_password = None):
         self.email = email
         set_clauses = []
         update_values = []
@@ -365,13 +365,15 @@ class Users:
         if new_password != '':
             set_clauses.append('password = ?')
             update_values.append(new_password)
-        update_values.append(self.email)
+        update_values.append(email)
 
         set_clause_string = ' , '.join(set_clauses)
 
         update_sql = f'''
             UPDATE Users SET {set_clause_string} 
             WHERE email = ?'''
+        print(update_sql)
+        print(update_values)
         cursor.execute(update_sql, update_values)
         cursor.connection.commit()
 
@@ -410,6 +412,8 @@ class Users:
 
         row = cursor.execute(select_sql_2, (self.user_id,)).fetchone()
         print(f'\nAverage competency score, across all assessment results: {row[0]}\n')
+
+
 
     #  user report - csv export 
 
@@ -464,8 +468,8 @@ new_user = Users()
 # new_user.add_user(cursor)
 # new_user.view_user_assessments(cursor)
 # new_user.manager_edit_user('','','','','','','',1)
-# new_user.email='bogdan@none.com'
-# new_user.edit_own_data('Boo','','','','')
+# new_user.email='jsmith@somemail.com'
+# new_user.edit_own_data('Johnny','','','','')
 
 
 
@@ -630,9 +634,6 @@ class Assessments:
             
 
 
-
-
-
 new_assessment = Assessments()
 # new_assessment.set_assessments(16, '2002-08-22', 'Using an API: a hands on exercise', 'In this exercise you are going to use a Google Spreadsheet to retrieve records from an API to Flickr, and display the results', 'Begginer')
 # new_assessment.add_assessment(cursor)
@@ -759,23 +760,24 @@ class Competencies:
         '''
 
 
-        rows = cursor.execute(select_sql_2, (self.competency_id,)).fetchall()
+        rows = cursor.execute(select_sql_2,).fetchall()
 
         if not rows:
             print('No Competencies for this user')
             return
-        print(f'{"First Name":<20} {"Last Name":<20} {"Competency Name":<40} {"Assessment Name":<40} {"Score":<5}')
+        print(f'{"First Name":<20} {"Last Name":<20} {"Competency Name":<40} {"Score":<5} {"Assessment Name":<40} {"Date Taken":<20} ')
         for row in rows:
-            print(f'{row[0]:<20} {row[1]:<20} {row[2]:<40} {row[3]:<40} {row[4]:<5}')
+            print(f'{row[0]:<20} {row[1]:<20} {row[2]:<40} {row[3]:<5} {row[4]:<40} {row[5]:<40}')
 
-        row1 = cursor.execute(select_sql_2, (self.competency_id,)).fetchone()
+        row1 = cursor.execute(select_sql_1, (self.competency_id,)).fetchone()
         print(f'\nAverage competency score, across all assessment results: {row1[0]}\n')
 
-        with open('user_report.csv', 'w') as file:
+        with open('competencies_report.csv', 'w') as file:
             writer = csv.writer(file)
-            writer.writerow(['first_name', 'last_name', 'c.name', 'a.name', 'score'])
+            writer.writerow(['first_name', 'last_name', 'competency', 'score', 'assessment', 'date_taken'])
             writer.writerows(rows)
             writer.writerow(['Average_competency_score_across_all_assessment_results:', row1[0]])
+
 
 new_competency = Competencies()
 # # new_competency.set_competencies('API', 'Learn how to work with API', '2002-08-22')
@@ -799,6 +801,9 @@ if current_usertype[2] == 'user':
                 (A) to view your Assessments
                 (Q) to quit / log out''')
     user_choice = input('Enter your choice: ').lower()
+
+
+
     if user_choice == 'e':
         new_first_name = input('Enter your NEW FIRST NAME or Enter to skip: ')
         new_last_name = input('Enter your NEW LAST NAME or Enter to skip: ')
@@ -806,7 +811,10 @@ if current_usertype[2] == 'user':
         new_email = input('Enter your NEW EMAIL or Enter to skip: ')
         new_password = input('Enter your NEW PASSWORD or Enter to skip: ')
 
-        new_user.edit_own_data(new_first_name, new_last_name, new_phone, new_email, new_password)
+        new_user.edit_own_data(email, new_first_name, new_last_name, new_phone, new_email, new_password)
+
+
+
     elif user_choice == 'c':
         new_user.view_own_competencies(email, cursor)
     elif user_choice == 'a':
@@ -957,125 +965,10 @@ if current_usertype [2] == 'manager':
             user_id = input('Enter user_id: ')
             new_user.csv_user_report(cursor, user_id)
         if manager_select == 2:
-            pass
+            competency_id = input('Enter competency_id: ')
+            new_competency.csv_competency_report(cursor, competency_id)
     if manager_choice == 'i':
         csvimp_result()
     if manager_choice == 'q':
         quit()
 
-
-
-
-
-        
-
-
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# User Competency Summary Report
-
-#     def user_competency_summary_report(self, cursor):
-#         select_sql = '''
-        # SELECT u.first_name, u.last_name, c.name, a.name, r.score
-        # FROM Users u
-        # JOIN Competency_Assessment_Results r ON
-        # u.user_id = r.user_id
-        # JOIN Assessments a ON
-        # r.assessment_id = a.assessment_id
-        # JOIN Competencies c ON
-        # a.competency_id = c.competency_id
-        # WHERE r.user_id = ?,
-        # SELECT AVG(r.score) as Avarage_Score
-        # From Competency_Assessment_Results r
-        # WHERE r.user_id = 1
-#         '''
-
-
-#         rows = cursor.execute(select_sql, (self.user_id,)).fetchall()
-        
-#         if not rows:
-#             print('No Competencies for this user')
-#             return
-#         print(f'{"First Name":<20} {"Last Name":<20} {"Competency Name":<40} {"Assessment Name":<40}{"Score":<5} {"Average Competency Score":<40}')
-#         for row in rows:
-#             print(f'{row[0]:<20} {row[1]:<20} {row[2]:<40} {row[3]:<40} {row[4]:<5} {row[5]:<40}')
-
-
-# new_result = AssessmentResults()
-# # new_result.set_results(1, 8, 3, '2002-09-22', 2)
-# # new_result.add_result_user(cursor)
-# new_result.user_id = 1
-# # new_result.edit_result(4)
-# new_result.user_competency_summary_report(cursor)
-
-
-
-# SELECT AVG(r.score) as Avarage_Score
-# From Competency_Assessment_Results r
-# Where r.user_id = 1
-
-
-
-# username = "boss"
-# password = "1234"
-# con = sql.connect("data.db")
-# cur = con.cursor()
-# statement = f"SELECT username from users WHERE username='{username}' AND Password = '{password}';"
-# cur.execute(statement)
-# if not cur.fetchone():  # An empty result evaluates to False.
-#     print("Login failed")
-# else:
-#     print("Welcome")
-
-
-# def login():
-#     idnumber=input("Enter id:") #this could be username in a login feature
-#     name=input("Enter name:") #this would be a password in a login feature
-#     conn = sqlite3.connect("test.db") #establish a connection to the database
-#     cursor=conn.cursor() #the cursor is essentially an iterator,which automatically invokes fetchall, or fetchone
-#     cursor.execute('SELECT * from STUDENT WHERE id="%s" AND name="%s"' %(idnumber,name))
-#     if cursor.fetchone() is not None: #if the iterator does actually return something (details are found...then...)
-#         print("Welcome you are logged in")
-#     else:
-#         print("Login failed")
-
-
-    # def check_password(self, email, new_password, cursor):
-    #     new_password = bcrypt.hashpw(new_password.encode('utf-8'), self.salt)
-    #     select_sql = '''
-    #         SELECT email FROM Users WHERE password=? AND email=?
-    #     ;'''
-
-    #     row = cursor.execute(select_sql, (new_password, email)).fetchone()
-        
-    #     return (row != None)
