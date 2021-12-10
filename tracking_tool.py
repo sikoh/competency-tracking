@@ -800,29 +800,23 @@ if current_usertype[2] == 'user':
                 (C) to view your Competencies
                 (A) to view your Assessments
                 (Q) to quit / log out''')
-    user_choice = input('Enter your choice: ').lower()
+user_choice = input('Enter your choice: ').lower()
+if user_choice == 'e':
+    new_first_name = input('Enter your NEW FIRST NAME or Enter to skip: ').title()
+    new_last_name = input('Enter your NEW LAST NAME or Enter to skip: ').title()
+    new_phone = input('Enter your NEW PHONE NUMBER(only numbers) or Enter to skip: ')
+    new_email = input('Enter your NEW EMAIL or Enter to skip: ')
+    new_password = input('Enter your NEW PASSWORD or Enter to skip: ')
 
-
-
-    if user_choice == 'e':
-        new_first_name = input('Enter your NEW FIRST NAME or Enter to skip: ')
-        new_last_name = input('Enter your NEW LAST NAME or Enter to skip: ')
-        new_phone = input('Enter your NEW PHONE NUMBER(only numbers) or Enter to skip: ')
-        new_email = input('Enter your NEW EMAIL or Enter to skip: ')
-        new_password = input('Enter your NEW PASSWORD or Enter to skip: ')
-
-        new_user.edit_own_data(email, new_first_name, new_last_name, new_phone, new_email, new_password)
-
-
-
-    elif user_choice == 'c':
-        new_user.view_own_competencies(email, cursor)
-    elif user_choice == 'a':
-        new_user.view_own_assessments(email, cursor)
-    elif user_choice == 'q':
-        quit()
-    else:
-        print('Not valid input. Please enter E, C, A or Q')
+    new_user.edit_own_data(email, new_first_name, new_last_name, new_phone, new_email, new_password)
+elif user_choice == 'c':
+    new_user.view_own_competencies(email, cursor)
+elif user_choice == 'a':
+    new_user.view_own_assessments(email, cursor)
+elif user_choice == 'q':
+    quit()
+else:
+    print('Not valid input. Please enter E, C, A or Q')
 if current_usertype [2] == 'manager':
     print(f'''Welcome {current_usertype[0]} {current_usertype[1]}. Please select:
                 (V) to VIEW data
@@ -832,143 +826,161 @@ if current_usertype [2] == 'manager':
                 (R) to VIEW and EXPORT Reports
                 (I) import from CSV
                 (Q) to Quit / Log out''')
-    manager_choice = input('Enter your choice: ').lower()
-    if manager_choice == 'v':
-        print('''What would you like to View today? Please select:
-                    (1) to view all users in a list
-                    (2) to search for users by first name or last name
-                    (3) to view all user competencies by user
-                    (4) to view a report of all users and their competency levels for a given competency
-                    (5) to view a competency level report for an individual user
-                    (6) to view a list of assessments for a given user 
-                    (7) to Quit /  log out''')
-        manager_select = int(input('Enter your choice(number 1-7): '))
-        if manager_select == 1:
-            new_user.view_all_users(cursor)
-        if manager_select == 2:
-            first_name = input('Enter FIRST NAME of the user or Enter to skip: ')
-            last_name = input('Enter LAST NAME of the user or Enter to skip: ')
-            new_user.search_user_byname(cursor, first_name, last_name)
-        if manager_select == 3:
-            user_id = input('Enter user_id of the user: ')
-            new_user.view_user_competencies(user_id, cursor)
-        if manager_select == 4:
-            competency_id = input('Enter competency_id: ')
-            new_competency.view_level_comp_rep(competency_id, cursor)
-        if manager_select == 5:
-            user_id = int(input('Enter user_id: '))
-            new_user.user_competency_summary_report(cursor, user_id)
-        if manager_select == 6:
-            user_id = input('Enter user_id of the user: ')
-            new_user.view_user_assessments(user_id, cursor)
-        if manager_select == 7:
-            quit
-    if manager_choice == 'a':
-        print('''What would you like to ADD today? Please select:
-                    (1) to ADD a user 
-                    (2) to ADD a new competency
-                    (3) to ADD a new assessment to a competency
-                    (4) to ADD an assessment result for a user
-                    (5) to quit''')
-        manager_select = int(input('Enter your choice(number 1-5): '))
-        # add user
-        if manager_select == 1:
-            first_name = input('Enter first name: ').title()
-            last_name = input('Enter last name: ').title()
-            phone = input('Enter phone number: ')
-            email = input('Enter an email: ')
-            password = input('Enter a password: ')
-            date_created = input('Enter date_created: ')
-            hire_date = input('Enter hire_date: ')
-            user_type = input('Enter a user type: ')
-            new_user.add_user(first_name, last_name, phone, email, password, date_created, hire_date, user_type, cursor)
-        # add competency
-        if manager_select == 2:
-            name = input('Enter competency name: ')
-            description = input('Enter description: ')
-            date_added = input('Enter date_added: ')
-            new_competency.add_competency(name, description, date_added, cursor)
-        # add assessment
-        if manager_select == 3:
-            competency_id = int(input('Enter a competency_id: '))
-            date_established = input('Enter date_established: ')
-            name = input('Enter assessment name: ') 
-            description = input('Enter description: ')
-            level = input('Enter level: ').title()
-            new_assessment.add_assessment(competency_id, date_established, name, description, level, cursor)
-        # add result
-        if manager_select == 4:
-            user_id = input('Enter user_id: ')
-            assessment_id = input('Enter assessment_id: ')
-            score = input("Enter user's result: ")
-            date_taken = input('Enter date_taken: ')
-            manager_id = input('Enter manager_id: ')
-            new_result.add_result_user(user_id, assessment_id, score, date_taken, manager_id)
-        if manager_select == 5:
-            quit()
-    # edit choices
-    if manager_choice == 'e':
-        print('''What would you like to Edit today? Please select:
-            (1) to EDIT a user's information 
-            (2) to EDIT a competency
-            (3) to EDIT an assessmentS
-            (4) to EDIT an assessment result
-            (5) to quit''')
-        manager_select = int(input('Enter your choice(number 1-5): '))
-        # edit user's info/data
-        if manager_select == 1:
-            user_id = int(input('Enter user_id: '))
-            first_name = input('Enter FIRST NAME or Enter to skip: ').title()
-            last_name = input('Enter the new LAST NAME or Enter to skip: ').title()
-            phone = input('Enter PHONE NUMBER(only numbers) or Enter to skip: ')
-            email = input('Enter EMAIL or Enter to skip: ')
-            date_created = input('Enter date_created or Enter to skip: ')
-            hire_date = input('Enter hire_date or Enter to skip: ')
-            user_type = input('Enter user_type or Enter to skip: ')
-            active = input('Enter active or Enter to skip: ')
-            new_user.manager_edit_user(user_id, first_name, last_name, phone, email, date_created, hire_date , user_type, active)
-        # edit a competency
-        if manager_select == 2:
-            competency_id = int(input('Enter competency_id: '))
-            name = input('Enter the new competency name or Enter to skip: ')
-            description = input('Enter the new description or Enter to skip: ')
-            date_added = input('Enter the new date_added or Enter to skip: ')
-            active = input('Enter active or Enter to skip: ')
-            new_competency.edit_competency(competency_id, name, description, date_added, active)
-        # edit an assessment
-        if manager_select == 3:
-            assessment_id = input('Enter assessment_id: ')
-            date_established = input('Enter new date_established or Enter to skip: ')
-            name = input('Enter the new assessment name or Enter to skip: ')
-            description = input('Enter the new description or Enter to skip: ')
-            level = input('Enter the new level or Enter to skip: ')
-            active = input('Enter active or Enter to skip: ')
-            new_assessment.edit_assessment(assessment_id, date_established, name, description, level, active)
-        # edit a result
-        if manager_select == 4:
-            result_id = input('Enter an result_id: ')
-            new_score = input('Enter the new assessment result: ')
-            new_result.edit_result(result_id, new_score)
-        if manager_select == 5:
-            quit()
-    # delete a result
-    if manager_choice == 'd':
-        result_id = input('Enter result_id: ')
-        new_result.delete_result(result_id)
-    if manager_choice == 'r':
-        print('''Which REPORT would you like to VIEW and EXPORT? Enter:
-                    (1) for User Competency Summary Report
-                    (2) for Competency Results Summary for all Users
-        ''')
-        manager_select = int(input('Enter your choice: '))
-        if manager_select == 1:
-            user_id = input('Enter user_id: ')
-            new_user.csv_user_report(cursor, user_id)
-        if manager_select == 2:
-            competency_id = input('Enter competency_id: ')
-            new_competency.csv_competency_report(cursor, competency_id)
-    if manager_choice == 'i':
-        csvimp_result()
-    if manager_choice == 'q':
+manager_choice = input('Enter your choice: ').lower()
+if manager_choice == 'v':
+    print('''What would you like to View today? Please select:
+                (1) to view all users in a list
+                (2) to search for users by first name or last name
+                (3) to view all user competencies by user
+                (4) to view a report of all users and their competency levels for a given competency
+                (5) to view a competency level report for an individual user
+                (6) to view a list of assessments for a given user 
+                (7) to Quit /  log out''')
+    manager_select = int(input('Enter your choice(number 1-7): '))
+    if manager_select == 1:
+        new_user.view_all_users(cursor)
+    elif manager_select == 2:
+        first_name = input('Enter FIRST NAME of the user or Enter to skip: ')
+        last_name = input('Enter LAST NAME of the user or Enter to skip: ')
+        new_user.search_user_byname(cursor, first_name, last_name)
+    elif manager_select == 3:
+        user_id = input('Enter user_id of the user: ')
+        new_user.view_user_competencies(user_id, cursor)
+    elif manager_select == 4:
+        competency_id = input('Enter competency_id: ')
+        new_competency.view_level_comp_rep(competency_id, cursor)
+    elif manager_select == 5:
+        user_id = int(input('Enter user_id: '))
+        new_user.user_competency_summary_report(cursor, user_id)
+    elif manager_select == 6:
+        user_id = input('Enter user_id of the user: ')
+        new_user.view_user_assessments(user_id, cursor)
+    elif manager_select == 7:
+        quit
+    else: 
+        print ('Invalid Input!')
+elif manager_choice == 'a':
+    print('''What would you like to ADD today? Please select:
+                (1) to ADD a user 
+                (2) to ADD a new competency
+                (3) to ADD a new assessment to a competency
+                (4) to ADD an assessment result for a user
+                (5) to quit''')
+    manager_select = int(input('Enter your choice(number 1-5): '))
+    # add user
+    if manager_select == 1:
+        first_name = input('Enter first name: ').title()
+        last_name = input('Enter last name: ').title()
+        phone = input('Enter phone number: ')
+        email = input('Enter an email: ')
+        password = input('Enter a password: ')
+        date_created = input('Enter date_created: ')
+        hire_date = input('Enter hire_date: ')
+        user_type = input('Enter a user type: ')
+        new_user.add_user(first_name, last_name, phone, email, password, date_created, hire_date, user_type, cursor)
+    # add competency
+    elif manager_select == 2:
+        name = input('Enter competency name: ')
+        description = input('Enter description: ')
+        date_added = input('Enter date_added: ')
+        new_competency.add_competency(name, description, date_added, cursor)
+    # add assessment
+    elif manager_select == 3:
+        competency_id = int(input('Enter a competency_id: '))
+        date_established = input('Enter date_established: ')
+        name = input('Enter assessment name: ') 
+        description = input('Enter description: ')
+        level = input('Enter level: ').title()
+        new_assessment.add_assessment(competency_id, date_established, name, description, level, cursor)
+    # add result
+    elif manager_select == 4:
+        user_id = input('Enter user_id: ')
+        assessment_id = input('Enter assessment_id: ')
+        score = input("Enter user's result: ")
+        date_taken = input('Enter date_taken: ')
+        manager_id = input('Enter manager_id: ')
+        new_result.add_result_user(user_id, assessment_id, score, date_taken, manager_id)
+    elif manager_select == 5:
         quit()
+    else: 
+        print('Invalid Input!')
+# edit choices
+elif manager_choice == 'e':
+    print('''What would you like to Edit today? Please select:
+        (1) to EDIT a user's information 
+        (2) to EDIT a competency
+        (3) to EDIT an assessmentS
+        (4) to EDIT an assessment result
+        (5) to quit''')
+    manager_select = int(input('Enter your choice(number 1-5): '))
+    # edit user's info/data
+    if manager_select == 1:
+        user_id = int(input('Enter user_id: '))
+        first_name = input('Enter FIRST NAME or Enter to skip: ').title()
+        last_name = input('Enter the new LAST NAME or Enter to skip: ').title()
+        phone = input('Enter PHONE NUMBER(only numbers) or Enter to skip: ')
+        email = input('Enter EMAIL or Enter to skip: ')
+        date_created = input('Enter date_created or Enter to skip: ')
+        hire_date = input('Enter hire_date or Enter to skip: ')
+        user_type = input('Enter user_type or Enter to skip: ')
+        active = input('Enter active or Enter to skip: ')
+        new_user.manager_edit_user(user_id, first_name, last_name, phone, email, date_created, hire_date , user_type, active)
+    # edit a competency
+    elif manager_select == 2:
+        competency_id = int(input('Enter competency_id: '))
+        name = input('Enter the new competency name or Enter to skip: ')
+        description = input('Enter the new description or Enter to skip: ')
+        date_added = input('Enter the new date_added or Enter to skip: ')
+        active = input('Enter active or Enter to skip: ')
+        new_competency.edit_competency(competency_id, name, description, date_added, active)
+    # edit an assessment
+    elif manager_select == 3:
+        assessment_id = input('Enter assessment_id: ')
+        date_established = input('Enter new date_established or Enter to skip: ')
+        name = input('Enter the new assessment name or Enter to skip: ')
+        description = input('Enter the new description or Enter to skip: ')
+        level = input('Enter the new level or Enter to skip: ')
+        active = input('Enter active or Enter to skip: ')
+        new_assessment.edit_assessment(assessment_id, date_established, name, description, level, active)
+    # edit a result
+    elif manager_select == 4:
+        result_id = input('Enter an result_id: ')
+        new_score = input('Enter the new assessment result: ')
+        new_result.edit_result(result_id, new_score)
+    elif manager_select == 5:
+        quit()
+    else:
+        print('Invalid input!')
+# delete a result
+elif manager_choice == 'd':
+    result_id = input('Enter result_id: ')
+    new_result.delete_result(result_id)
+elif manager_choice == 'r':
+    print('''Which REPORT would you like to VIEW and EXPORT? Enter:
+                (1) for User Competency Summary Report
+                (2) for Competency Results Summary for all Users
+                (3) for only export of user's list
+                (4) to quit / log out
+    ''')
+    manager_select = int(input('Enter your choice: '))
+    if manager_select == 1:
+        user_id = input('Enter user_id: ')
+        new_user.csv_user_report(cursor, user_id)
+    elif manager_select == 2:
+        competency_id = input('Enter competency_id: ')
+        new_competency.csv_competency_report(cursor, competency_id)
+    elif manager_select == 3:
+        csvexp_users_list()
+        print('Export done! Please see your users_list.csv file')
+    elif manager_select == 4:
+        quit()
+    else:
+        print('Invalid Input!')
+elif manager_choice == 'i':
+    csvimp_result()
+elif manager_choice == 'q':
+    quit()
+else:
+    print('Invalid Input!')
+
 
