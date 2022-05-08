@@ -112,50 +112,91 @@ name - the name of the competency as shown in the list below under Initial Compe
 date_created - the date the competency was added to the application
 
 The initial list of competencies to track is:
+
 Competency Scale
+
 Competencies are measured and tracked on a scale from 0-4:
+
 0 - No competency - Needs Training and Direction
+
 1 - Basic Competency - Needs Ongoing Support
+
 2 - Intermediate Competency - Needs Occasional Support
+
 3 - Advanced Competency - Completes Task Independently
+
 4 - Expert Competency - Can Effectively pass on this knowledge and can initiate optimizations
+
+
 Initial Competency List
+
 The CEO wants to start with the list of competencies below:
-Computer Anatomy
-Data Types
-Variables
-Functions
-Boolean Logic
-Conditionals
-Loops
-Data Structures
-Lists
-Dictionaries
+
+-Computer Anatomy
+-Data Types
+-Variables
+-Functions
+-Boolean Logic
+-Conditionals
+-Loops
+-Data Structures
+-Lists
+-Dictionaries
+
 Working with Files
+
 Exception Handling
+
 Quality Assurance (QA)
+
 Object-Oriented Programming
+
 Recursion
+
 Databases
+
 Competency Assessments
-A competency assessment is a tool used to measure one's mastery level of a particular competency. It could be an online or written test. It could be the result of an interview. It could be a grading of a programming assignment. Whatever the assessment is, it is designed to produce a single number that is a rough indicator of an individuals level of competence in a given area (see Competency Scale above)
+
+A competency assessment is a tool used to measure one's mastery level of a particular competency. 
+It could be an online or written test. It could be the result of an interview. 
+It could be a grading of a programming assignment. Whatever the assessment is, it is designed to produce a single number that is a rough indicator of an individuals level of competence in a given area (see Competency Scale above)
+
 For example, Bob would like to know how well he is doing in the Data Types competency. There happens to be an online test he can take called Data Types Competency Measure. Bob takes the test (assessment) and it tells Bob that his competency level is 2 (Intermediate Competency - Needs Occasional Support). This let's Bob know that he still has some work to do to raise his competency to a 3, where he wants it to be.
+
 Let's say that Bob studies and works hard to increase his understanding of Data Types and he wants to re-test. So, he retakes the Data Types assessment a month later and his score is now 3. Good job, Bob!
+
 The software should track each of those assessments with the date they were taken and the result of the assessment (0, 1, 2, 3 or 4).
+
 Competency Assessment Data
+
 The software should store the following information about an assessment:
+
 name - the name of the assessment, like Data Structures Competency Measurement or Verbal Communication Interview
+
 date created - the date the assessment was added to the database
+
+
 Competency Assessment Results
+
 When a user takes an assessment, it should be recorded as a Competency Assessment Result, which should record:
+
 user - the user that took the assessment (probably a user_id in the database)
+
 assessment - the assessment that the user took (probably an assessment_id in the database)
+
 score - the resulting score (0-4)
+
 date taken - the date and time the assessment was taken
+
 manager - the manager, if any, that administered the test. (probably a user_id in the database)
+
 Users can retake competency assessments as many times as they would like, so they may have multiple Assessment Results for any given assessment.
+
+
 Users
+
 A user is an individual that will be taking competency assessments. This could be an employee or even a manager.
+
 The software should keep track of the following data for users:
 first name
 last name
@@ -167,8 +208,12 @@ date created - the date this user was created in the system
 hire date - the date this user was hired
 user type - Either a user or a manager. This would be used to determine the access the user has to the system.
 You will probably also want to keep track of a user id of some sort.
+
+
+
 Reports
 There are two primary reports this application should provide:
+
 User Competency Summary
 Competency Results Summary for all Users
 User Competency Summary
