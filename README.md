@@ -1,5 +1,7 @@
 Capstone Project
+
 Capstone Project Requirements
+
 Welcome to the Capstone Project! This marks the final project for the Coding Foundations course. This is an opportunity to put into practice all of the skills you have learned throughout this course and even to possibly learn some new ones.
 This project is designed to be challenging and will likely require some review and studying on your part. Your goal with this project should be to produce quality code and professional output.
 The requirements are likely more open-ended than you are used to. This is on purpose. This will allow you flexibility to produce a solution that you can design on your own. However, make sure that your solution meets all of the requirements. Please feel free to ask clarifying questions so that you fully understand the requirements.
