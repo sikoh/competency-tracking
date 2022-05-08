@@ -215,45 +215,87 @@ Reports
 There are two primary reports this application should provide:
 
 User Competency Summary
+
 Competency Results Summary for all Users
+
 User Competency Summary
+
 This is a summary of all the competency scores for a user. It should contain:
+
 User information like name, email
+
 List of all competencies with their corresponding scores, if the user has one.
+
 If the user has more than one assessment result for a given competency, use the most recent as their score.
+
 Average competency score, across all assessment results.
+
 This is a simple average, so, add up all the assessment results, divide by the number of competencies and you get the overall average competency score
 If a user doesn't have a score for a given competency, use 0 for that competency score.
+
 Competency Results Summary
+
 This is a results summary for all users. It is a bit like the opposite of the User Competency Summary. This report is for a single competency, like Data Structures, and will list all users with their competency scores for that competency. This should provide:
+
 Competency information like name
+
 Average competency score for this competency across all users.
+
 Add all competency scores from the most recent assessment results for each active user and divide by the number of active users.
+
 List of Users with the following information:
+
 Name
+
 Competency Score - The score from the most recent assessment result for this user and this competency. Write 0, if never taken.
+
 Assessment - the most recent assessment taken, if any. blank, if none.
+
 Date Taken - the date the most recent assessment was taken, if any.
+
 CSV Export
+
 Your application should allow for CSV export of at least two lists. For example, you may want to export the User list or the Competencies list. You will produce a valid CSV file containing the information from the list.
+
 Include a Header Row with field names in your CSV file.
+
 CSV Import
+
+
 Your application should provide the ability to import a CSV file for Assessment Results. This CSV file would contain the following columns:
+
 user_id
+
 assessment_id
+
 score
+
 date_taken
+
 and any others you think might be helpful.
+
 This import will read the CSV file and add records to the Assessment Results table in the database.
+
+
 Error Handling
+
 Keep in mind that your CEO is wanting this application to be production quality. Your job is to create the Beta version which will be tested by users, so it should handle errors gracefully. Make sure you are checking for errors with conditionals and/or try-except blocks. You don't want it to crash do you?
 How to Turn In?
+
 Your assignment will be uploaded to a public GitHub repository - a public repository in your personal GitHub account will be fine. If you do not have a personal GitHub account, the first step is to create one.
+
 You will push your code, csv file(s), database and documentation to your public repository and submit the public URL to this assignment.
+
 Grading
+
 Your capstone project will be graded with the following in mind:
+
 Meets all requirements
+
 Has few errors
+
 Looks professional
+
 Provides good documentation
+
 Is turned in correctly and easy to execute.
